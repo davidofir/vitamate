@@ -2,16 +2,17 @@ import {FaSearch} from 'react-icons/fa'
 import './SearchBar.css'
 import { useEffect, useState } from 'react'
 import drugs from '../../Drugs/Drugs.json'
-export default function SearchBar(){
+export default function SearchBar({setResults}){
     const [input,setInput] = useState("");
 
     const fetchData = (value) => {
+        let results = []
         if (value.length >= 3) {
-          return drugs['drug-name'].filter(name => 
+        results = drugs['drug-name'].filter(name => 
             name.toUpperCase().includes(value.toUpperCase())
           );
         }
-        return [];
+        setResults(results);
       };
     const handleChange = (value)=>{
         setInput(value)

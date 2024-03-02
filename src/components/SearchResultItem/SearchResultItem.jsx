@@ -1,7 +1,7 @@
 import "./SearchResultItem.css"
-export default function SearchResultItem({key,result}){
+export default function SearchResultItem({key,result,setSelectedResults,selectedResults}){
     return(
-        <div key={key}>
+        <div className="search-item-container" onClick={e=>setSelectedResults([...selectedResults,result])} key={key}>
             {result}
         </div>
     );

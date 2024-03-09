@@ -15,10 +15,10 @@ export const fetchDrugs = async (drugName) => {
     return {
         'purpose': findFieldByKeyContaining(fetchedData, 'purpose'),
         'warnings': findFieldByKeyContaining(fetchedData, 'warnings'),
-        'do_not_use': findFieldByKeyContaining(fetchedData, 'do_not_use'),
+        'do not use': findFieldByKeyContaining(fetchedData, 'do_not_use'),
         'usage': findFieldByKeyContaining(fetchedData, 'indications_and_usage'),
         'dosage': findFieldByKeyContaining(fetchedData, 'dosage_and_administration'),
-        'ask_doctor': findFieldByKeyContaining(fetchedData, 'ask_doctor_or_pharmacist'),
+        'ask doctor': findFieldByKeyContaining(fetchedData, 'ask_doctor_or_pharmacist'),
         'questions': findFieldByKeyContaining(fetchedData, 'questions')
     }
 };

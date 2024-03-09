@@ -19,8 +19,16 @@ function Search(){
   useEffect(() => {
       (async () => {
           if (drugName.length > 0) {
-              const data = await fetchDrugs(drugName);
-              setDrugData(data);
+            try{
+                const data = await fetchDrugs(drugName);
+                setDrugData(data);
+            }
+            catch(e){
+                setDrugData({
+                    'Drug not found':'Please try a different drug'
+                })
+            }
+
           }
       })();
   }, [drugName]);

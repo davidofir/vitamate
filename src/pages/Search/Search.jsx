@@ -15,7 +15,15 @@ function Search(){
   const [selectedResults, setSelectedResults] = useState([]);
   const [drugName, setDrugName] = useState('');
   const [drugData, setDrugData] = useState();
-
+  const stripHtml = (htmlString) => {
+    const temporalDivElement = document.createElement("div");
+    temporalDivElement.innerHTML = htmlString;
+    let text = temporalDivElement.textContent || temporalDivElement.innerText || "";
+  
+    text = text.replace('•', '\n•');
+  
+    return text;
+  };
   useEffect(() => {
       (async () => {
           if (drugName.length > 0) {
@@ -44,7 +52,7 @@ function Search(){
                   <Tab eventKey={key} title={key} key={index}>
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                       <Card style={{padding:'10px',width:'80%',height:'80%'}}>
-                        {value}
+                      {stripHtml(value)}
                       </Card>
                     </div>
                   </Tab>

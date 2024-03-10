@@ -2,7 +2,6 @@ import {FaSearch} from 'react-icons/fa'
 import './SearchBar.css'
 import { useEffect, useState } from 'react'
 import drugs from '../../Drugs/Drugs.json'
-import { Button } from 'bootstrap';
 export default function SearchBar({setResults,input,setInput}){
     useEffect(()=>{
         fetchData(input)

@@ -18,13 +18,6 @@ function Search() {
     const [input,setInput] = useState('');
     const [existingResults,setExistingResults] = useState({});
 
-    const addResult = (newResult) => {
-        if (newResult && !existingResults[newResult]) {
-            setSelectedResults(prevSelectedResults => [...prevSelectedResults, newResult]);
-            setExistingResults(prev => ({ ...prev, [newResult]: true }));
-        }
-    };
-
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -115,7 +108,7 @@ function Search() {
             </div>
             <Button
                 className="remove-button"
-                style={{ borderRadius: '10px' }}
+                style={{ borderRadius: '10px', borderRadius:'20px' }}
                 onClick={(e) => {
                     e.stopPropagation();
                     removeResult(result);

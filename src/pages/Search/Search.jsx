@@ -15,14 +15,32 @@ function Search() {
     const [selectedResults, setSelectedResults] = useState([]);
     const [drugName, setDrugName] = useState('');
     const [drugData, setDrugData] = useState();
-    const existingResults = {};
+    const [input,setInput] = useState('');
+    const [existingResults,setExistingResults] = useState({});
+
+    const addResult = (newResult) => {
+        if (newResult && !existingResults[newResult]) {
+            setSelectedResults(prevSelectedResults => [...prevSelectedResults, newResult]);
+            setExistingResults(prev => ({ ...prev, [newResult]: true }));
+        }
+    };
+
+    const removeResult = (resultToRemove) => {
+        setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
+        setExistingResults(prev => {
+            const newResults = { ...prev };
+            delete newResults[resultToRemove];
+            return newResults;
+        });
+    };
+
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
         let text = temporalDivElement.textContent || temporalDivElement.innerText || "";
 
         text = text.replace('•', '\n•');
-
+        
         return text;
     };
     useEffect(() => {
@@ -31,6 +49,7 @@ function Search() {
                 try {
                     const data = await fetchDrugs(drugName);
                     setDrugData(data);
+                    console.log(data)
                 }
                 catch (e) {
                     setDrugData({
@@ -65,35 +84,51 @@ function Search() {
     return (
         <div className="parent-search">
             <div className="search-bar-container">
-                <SearchBar setResults={setResults} />
-                {results ? <SearchResultsList results={results} setSelectedResults={setSelectedResults} selectedResults={selectedResults} /> : <></>}
-                <Stack>
 
-                    {selectedResults.map((result, id) => {
-                        if (!existingResults[result]) {
-                            existingResults[result] = true;
-                            return (
-                                <div className="selected-result-item" key={id}>
-                                    <div onClick={() => { setDrugName(result) }}>
-                                        {result}
-                                    </div>
-                                    <Button
-                                        className="remove-button"
-                                        style={{ borderRadius: '10px' }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedResults(selectedResults.filter(item => item !== result));
-                                        }}
-                                        aria-label={`Remove ${result}`}
-                                    >
-                                        X
-                                    </Button>
-                                </div>
-                            );
-                        }
-                        return null;
-                    })}
-                </Stack>
+                
+                    <div style={{display:'flex',width:'100%'}}>
+                    <SearchBar setResults={setResults} input={input} setInput={setInput} />
+                    <Button onClick={()=>{
+                          setSelectedResults(prevSelectedResults => {
+                            const newResult = input.trim().toLocaleUpperCase();
+                            
+                            if (newResult && !existingResults[newResult]) {
+                                setExistingResults(prev => ({ ...prev, [newResult]: true }));
+                                return [...prevSelectedResults, newResult];
+                            }
+                            return prevSelectedResults;
+                        });  
+                    }
+                    
+                    } style={{marginLeft:'10px'}}>Search</Button>
+                    </div>
+                    {results ? <SearchResultsList results={results} setSelectedResults={setSelectedResults} selectedResults={selectedResults} existingResults={existingResults} setExistingResults={setExistingResults} /> : <></>}
+
+
+                    <Stack>
+    {selectedResults.map((result, index) => 
+        
+        (
+        <div className="selected-result-item" key={index}>
+            <div onClick={() => setDrugName(result)}>
+                {result}
+            </div>
+            <Button
+                className="remove-button"
+                style={{ borderRadius: '10px' }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    removeResult(result);
+                }}
+                aria-label={`Remove ${result}`}
+            >
+                X
+            </Button>
+        </div>
+    )
+    )}
+            
+</Stack>
             </div>
             <div>
                 {renderDrugDataTabs()}

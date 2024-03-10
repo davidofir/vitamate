@@ -42,7 +42,6 @@ function Search() {
                 try {
                     const data = await fetchDrugs(drugName);
                     setDrugData(data);
-                    console.log(data)
                 }
                 catch (e) {
                     setDrugData({
@@ -76,8 +75,8 @@ function Search() {
 
     return (
         <div className="parent-search">
-            <div className="search-bar-container">
 
+            <div className="search-bar-container">
                 
                     <div style={{display:'flex',width:'100%'}}>
                     <SearchBar setResults={setResults} input={input} setInput={setInput} />

@@ -17,7 +17,7 @@ function Search() {
     const [drugData, setDrugData] = useState();
     const [input,setInput] = useState('');
     const [existingResults,setExistingResults] = useState({});
-
+    const [currentSelectedItem,setCurrentSelectedItem] = useState(null);
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -86,6 +86,9 @@ function Search() {
                             
                             if (newResult && !existingResults[newResult]) {
                                 setExistingResults(prev => ({ ...prev, [newResult]: true }));
+                                if (currentSelectedItem !== newResult) {
+                                    setCurrentSelectedItem(newResult);
+                                }
                                 return [...prevSelectedResults, newResult];
                             }
                             return prevSelectedResults;
@@ -101,8 +104,8 @@ function Search() {
     {selectedResults.map((result, index) => 
         
         (
-        <div className="selected-result-item" key={index}>
-            <div onClick={() => setDrugName(result)}>
+        <div className={`selected-result-item ${currentSelectedItem === result ? 'selected' : ''}`} key={index}>
+            <div onClick={() => {setDrugName(result); setCurrentSelectedItem(result);}}>
                 {result}
             </div>
             <Button

@@ -12,16 +12,16 @@ public class User {
     private String id;
     private String login;
     private String name;
-    private List<String> drugIds;
+    private List<String> drugs;
 
     private RegistrationSource registrationSource;
     private Role role;
     public User(){}
 
-    public User(String login, String name, List<String> drugIds,RegistrationSource registrationSource, Role role) {
+    public User(String login, String name, List<String> drugs,RegistrationSource registrationSource, Role role) {
         this.login = login;
         this.name = name;
-        this.drugIds = drugIds;
+        this.drugs = drugs;
         this.role = role;
         this.registrationSource = registrationSource;
     }
@@ -33,18 +33,18 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
-    public void AddDrug(String drugId){
-        this.drugIds.add(drugId);
+    public void AddDrug(String drugs){
+        this.drugs.add(drugs);
     }
-    public void removeDrug(String drugId){
-        this.drugIds.remove(drugId);
+    public void removeDrug(String drugs){
+        this.drugs.remove(drugs);
     }
-    public List<String> getDrugIds() {
-        return drugIds;
+    public List<String> getDrugs() {
+        return drugs;
     }
 
-    public void setDrugIds(List<String> drugIds) {
-        this.drugIds = drugIds;
+    public void setDrugs(List<String> drugs) {
+        this.drugs = drugs;
     }
 
     public String getLogin() {

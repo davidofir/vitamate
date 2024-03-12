@@ -9,23 +9,16 @@ import java.util.List;
 public class UserDTO {
     private String login;
     private String name;
-    private List<String> drugIds;
+    private List<String> drugs;
     private Role role;
     private RegistrationSource registrationSource;
     public UserDTO(){}
-    public UserDTO(String login, String name, List<String> drugIds, RegistrationSource registrationSource, Role role){
+    public UserDTO(String login, String name, List<String> drugs, RegistrationSource registrationSource, Role role){
         this.login = login;
         this.name = name;
-        this.drugIds = drugIds;
+        this.drugs = drugs;
         this.registrationSource = registrationSource;
         this.role = role;
-    }
-    public UserDTO(String login, String name,List<String> drugIds,Role role, RegistrationSource registrationSource){
-        this.login = login;
-        this.name = name;
-        this.drugIds = drugIds;
-        this.role = role;
-        this.registrationSource = registrationSource;
     }
     public String getLogin() {
         return login;
@@ -43,12 +36,12 @@ public class UserDTO {
         this.name = name;
     }
 
-    public List<String> getDrugIds() {
-        return drugIds;
+    public List<String> getDrugs() {
+        return drugs;
     }
 
-    public void setDrugIds(List<String> drugIds) {
-        this.drugIds = drugIds;
+    public void setDrugs(List<String> drugs) {
+        this.drugs = drugs;
     }
 
     public Role getRole() {

@@ -11,9 +11,9 @@ public interface UserService {
     List<Optional<UserDTO>> findAll();
     Optional<UserDTO> findById(String id);
     void delete(String id);
-    void addDrugToUser(String userId,String drugId);
-    void removeDrugFromUser(String userId,String drugId);
-    Optional<UserDTO> findByLogin(String email);
+    void addDrugToUser(String userId,String drug);
+    void removeDrugFromUser(String userId,String drug);
+    Optional<UserDTO> findByLogin(String login);
     public Optional<UserDTO> convertToDto(User user);
     public User convertToUser(UserDTO userDto);
 }

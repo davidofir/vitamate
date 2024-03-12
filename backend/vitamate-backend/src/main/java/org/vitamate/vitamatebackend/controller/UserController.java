@@ -2,10 +2,7 @@ package org.vitamate.vitamatebackend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vitamate.vitamatebackend.domain.dtos.UserDTO;
 import org.vitamate.vitamatebackend.service.UserService;
 
@@ -20,5 +17,15 @@ public class UserController {
     @GetMapping
     public List<Optional<UserDTO>> getUsers(){
         return userService.findAll();
+    }
+    @PostMapping("/drugs")
+    public ResponseEntity<Void> AddDrugs(String userId,String drugName){
+        userService.addDrugToUser(userId,drugName);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/drugs")
+    public ResponseEntity<Void> DeleteDrugs(String userId, String drugName){
+        userService.removeDrugFromUser(userId,drugName);
+        return ResponseEntity.ok().build();
     }
 }

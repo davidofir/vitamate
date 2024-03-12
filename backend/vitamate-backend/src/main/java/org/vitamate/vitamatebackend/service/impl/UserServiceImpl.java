@@ -15,11 +15,9 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
-    DrugRepository drugRepository;
     @Autowired
     UserServiceImpl(UserRepository userRepository, DrugRepository drugRepository){
         this.userRepository = userRepository;
-        this.drugRepository = drugRepository;
     }
 
     @Override
@@ -48,22 +46,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addDrugToUser(String userId, String drugId) {
+    public void addDrugToUser(String userId, String drug) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        drugRepository.findById(drugId).orElseThrow(() -> new RuntimeException("Drug not found"));
-        if(!user.getDrugIds().contains(drugId)){
-            user.AddDrug(drugId);
+        if(!user.getDrugs().contains(drug)){
+            user.AddDrug(drug);
             userRepository.save(user);
         }
 
     }
 
     @Override
-    public void removeDrugFromUser(String userId, String drugId) {
+    public void removeDrugFromUser(String userId, String drug) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        drugRepository.findById(drugId).orElseThrow(() -> new RuntimeException("Drug not found"));
-        if(user.getDrugIds().contains(drugId)){
-            user.removeDrug(drugId);
+        if(user.getDrugs().contains(drug)){
+            user.removeDrug(drug);
             userRepository.save(user);
         }
     }
@@ -74,12 +70,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public User convertToUser(UserDTO userDto){
-        return new User(userDto.getLogin(), userDto.getName(), userDto.getDrugIds(),userDto.getRegistrationSource(), userDto.getRole());
+        return new User(userDto.getLogin(), userDto.getName(), userDto.getDrugs(),userDto.getRegistrationSource(), userDto.getRole());
     }
     public Optional<UserDTO> convertToDto(User user){
         if (user == null) {
             return Optional.empty();
         }
-        return Optional.of(new UserDTO(user.getLogin(), user.getName(), user.getDrugIds(), user.getRegistrationSource(),user.getRole()));
+        return Optional.of(new UserDTO(user.getLogin(), user.getName(), user.getDrugs(), user.getRegistrationSource(),user.getRole()));
     }
 }

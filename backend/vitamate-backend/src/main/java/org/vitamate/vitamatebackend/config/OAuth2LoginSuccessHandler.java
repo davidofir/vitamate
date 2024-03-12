@@ -66,6 +66,9 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
             });
+            this.setAlwaysUseDefaultTargetUrl(true);
+            this.setDefaultTargetUrl(frontendUrl);
+            super.onAuthenticationSuccess(request, response, authentication);
         }
         if("google".equals(oAuth2AccessToken.getAuthorizedClientRegistrationId())){
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
@@ -74,7 +77,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
             String name = attributes.getOrDefault("name","").toString();
             userService.findByLogin(login).ifPresentOrElse(user -> {
                 DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRole().name()))
-                        ,attributes,"id");
+                        ,attributes,"sub");
                 Authentication securityAuth = new OAuth2AuthenticationToken(newUser,List.of(new SimpleGrantedAuthority(user.getRole().name()))
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
@@ -83,14 +86,14 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                 user.setRole(Role.USER);
                 userService.save(userService.convertToDto(user).orElseThrow());
                 DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRole().name()))
-                        ,attributes,"id");
+                        ,attributes,"sub");
                 Authentication securityAuth = new OAuth2AuthenticationToken(newUser,List.of(new SimpleGrantedAuthority(user.getRole().name()))
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
             });
+            this.setAlwaysUseDefaultTargetUrl(true);
+            this.setDefaultTargetUrl(frontendUrl);
+            super.onAuthenticationSuccess(request, response, authentication);
         }
-        this.setAlwaysUseDefaultTargetUrl(true);
-        this.setDefaultTargetUrl(frontendUrl);
-        super.onAuthenticationSuccess(request, response, authentication);
     }
 }

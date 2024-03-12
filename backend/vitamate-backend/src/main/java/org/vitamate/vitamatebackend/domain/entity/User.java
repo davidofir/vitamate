@@ -10,19 +10,20 @@ import java.util.List;
 public class User {
     @Id
     private String id;
-    private String email;
+    private String login;
     private String name;
     private List<String> drugIds;
 
+    private RegistrationSource registrationSource;
+    private Role role;
     public User(){}
-    public User(String email, String name) {
-        this(email, name, new ArrayList<>());
-    }
 
-    public User(String email, String name, List<String> drugIds) {
-        this.email = email;
+    public User(String login, String name, List<String> drugIds,RegistrationSource registrationSource, Role role) {
+        this.login = login;
         this.name = name;
         this.drugIds = drugIds;
+        this.role = role;
+        this.registrationSource = registrationSource;
     }
 
     public String getName() {
@@ -46,8 +47,23 @@ public class User {
         this.drugIds = drugIds;
     }
 
-    public String getEmail() {
-        return email;
+    public String getLogin() {
+        return login;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public RegistrationSource getRegistrationSource() {
+        return registrationSource;
+    }
+
+    public void setRegistrationSource(RegistrationSource registrationSource) {
+        this.registrationSource = registrationSource;
+    }
 }

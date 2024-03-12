@@ -9,6 +9,7 @@ import org.vitamate.vitamatebackend.repository.UserRepository;
 import org.vitamate.vitamatebackend.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> findAll() {
+    public List<Optional<UserDTO>> findAll() {
         return userRepository.findAll()
                 .stream()
                 .map(this::convertToDto)
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO findById(String id) {
+    public Optional<UserDTO> findById(String id) {
         return userRepository.findById(id)
                 .map(this::convertToDto)
                 .orElse(null);
@@ -66,10 +67,19 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
     }
-    public User convertToUser(UserDTO userDto){
-        return new User(userDto.getEmail(), userDto.getName(),userDto.getDrugIds());
+
+    @Override
+    public Optional<UserDTO> findByLogin(String login) {
+        return convertToDto(userRepository.findByLogin(login));
     }
-    public UserDTO convertToDto(User user){
-        return new UserDTO(user.getEmail(),user.getName(),user.getDrugIds());
+
+    public User convertToUser(UserDTO userDto){
+        return new User(userDto.getLogin(), userDto.getName(), userDto.getDrugIds(),userDto.getRegistrationSource(), userDto.getRole());
+    }
+    public Optional<UserDTO> convertToDto(User user){
+        if (user == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new UserDTO(user.getLogin(), user.getName(), user.getDrugIds(), user.getRegistrationSource(),user.getRole()));
     }
 }

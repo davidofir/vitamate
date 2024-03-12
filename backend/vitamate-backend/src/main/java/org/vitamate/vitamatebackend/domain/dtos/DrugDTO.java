@@ -1,10 +1,12 @@
-package org.vitamate.vitamatebackend.entity;
-public class DrugEntity {
+package org.vitamate.vitamatebackend.domain.dtos;
 
+public class DrugDTO {
     private String drugName;
-    public DrugEntity(String drugName){
+    public DrugDTO(String drugName){
         this.drugName = drugName;
     }
+    public DrugDTO(){}
+
     public String getDrugName(){
         return this.drugName;
     }

@@ -25,7 +25,14 @@ public class User {
         this.role = role;
         this.registrationSource = registrationSource;
     }
-
+    public User(String id,String login, String name, List<String> drugs,RegistrationSource registrationSource, Role role) {
+        this.id = id;
+        this.login = login;
+        this.name = name;
+        this.drugs = drugs;
+        this.role = role;
+        this.registrationSource = registrationSource;
+    }
     public String getName() {
         return name;
     }
@@ -65,5 +72,11 @@ public class User {
 
     public void setRegistrationSource(RegistrationSource registrationSource) {
         this.registrationSource = registrationSource;
+    }
+    public void setId(String id){
+        this.id = id;
+    }
+    public String getId(){
+        return this.id;
     }
 }

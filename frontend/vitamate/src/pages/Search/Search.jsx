@@ -21,6 +21,7 @@ function Search() {
     const [existingResults,setExistingResults] = useState({});
     const [currentSelectedItem,setCurrentSelectedItem] = useState(null);
     const [drugNames, setDrugNames] = useState([]);
+    const [loggedIn,setLoggedIn] = useState(false);
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -30,6 +31,24 @@ function Search() {
         });
     };
     const serverUrl = 'http://localhost:8080';
+    const getDrugs = async () => {
+        try {
+            const response = await fetch(`${serverUrl}/users`, {
+                method: 'GET',
+                redirect:'follow',credentials:'include'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch drugs');
+            }
+            const drugs = await response.json();
+            if(response.redirected){
+                document.location = response.url;
+            }
+            setDrugData(drugs);
+        } catch (error) {
+            console.error('Error fetching drugs:', error);
+        }
+    };
     const persistDrugs = async () => {
         try {
             const response = await fetch('http://localhost:8080/users/drugs', {
@@ -49,9 +68,18 @@ function Search() {
         }
     };
 
-    function handleClick(){
-        persistDrugs();
-    }
+    const handleSaveClick = () => {
+        if (loggedIn) {
+            persistDrugs();
+        } else {
+            window.location.href = `${serverUrl}/auth/login`;
+        }
+    };
+
+    const handleLoginClick = () => {
+        window.location.href = `${serverUrl}/auth/login`;
+    };
+
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
@@ -61,6 +89,28 @@ function Search() {
         
         return text;
     };
+    useEffect(() => {
+        const checkAuthStatus = async () => {
+            try {
+                const response = await fetch(`${serverUrl}/users/auth/status`, {
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    setLoggedIn(true);
+                } else {
+                    setLoggedIn(false);
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+            }
+        };
+        checkAuthStatus();
+    }, []);
+    useEffect(()=>{
+        if(loggedIn){
+
+        }
+    },[loggedIn])
     useEffect(() => {
         (async () => {
             if (drugName.length > 0) {
@@ -77,7 +127,11 @@ function Search() {
             }
         })();
     }, [drugName]);
-
+    useEffect(() => {
+        if (loggedIn) {
+            getDrugs();
+        }
+    }, [loggedIn]);
     const renderDrugDataTabs = () => {
         if (!drugData) {
             return <div></div>;
@@ -101,8 +155,11 @@ function Search() {
     return (
         <div className="parent-search">
             <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
-                handleClick();
+                handleSaveClick();
             }} >Save</div>
+            <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+                handleLoginClick();
+            }} >Login</div>
             <div className="search-bar-container">
                 
                     <div style={{display:'flex',width:'100%'}}>

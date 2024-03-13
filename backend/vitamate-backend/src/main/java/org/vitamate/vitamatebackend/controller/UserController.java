@@ -1,6 +1,7 @@
 package org.vitamate.vitamatebackend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -15,7 +16,7 @@ public class UserController {
     @Autowired
     UserService userService;
     @GetMapping
-    public List<String> getUsers(@AuthenticationPrincipal OAuth2User principal){
+    public List<String> getDrugs(@AuthenticationPrincipal OAuth2User principal){
         String userId = getUserIdFromPrincipal(principal);
         return userService.getAllDrugs(userId);
     }
@@ -31,6 +32,16 @@ public class UserController {
         userService.removeDrugFromUser(userId,drugs);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/auth/status")
+    public ResponseEntity<?> authStatus(@AuthenticationPrincipal OAuth2User principal) {
+        if (principal != null) {
+            // Optionally return user details or a simple 'true' response
+            return ResponseEntity.ok(principal.getAttributes());
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+    }
+
     private String getUserIdFromPrincipal(OAuth2User principal) {
         if (principal.getAttributes().containsKey("sub")) {
             return principal.getAttribute("sub");
@@ -42,4 +53,5 @@ public class UserController {
 
         throw new IllegalArgumentException("User identifier not found in principal attributes");
     }
+
 }

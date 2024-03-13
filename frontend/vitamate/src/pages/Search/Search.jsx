@@ -10,6 +10,8 @@ import Modal from 'react-bootstrap/Modal';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Card from 'react-bootstrap/Card';
+import * as Icon from 'react-bootstrap-icons';
+
 function Search() {
     const [results, setResults] = useState([]);
     const [selectedResults, setSelectedResults] = useState([]);
@@ -18,6 +20,7 @@ function Search() {
     const [input,setInput] = useState('');
     const [existingResults,setExistingResults] = useState({});
     const [currentSelectedItem,setCurrentSelectedItem] = useState(null);
+    const [drugNames, setDrugNames] = useState([]);
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -26,7 +29,29 @@ function Search() {
             return newResults;
         });
     };
+    const serverUrl = 'http://localhost:8080';
+    const persistDrugs = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/users/drugs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify( Object.keys(existingResults) )
+            });
+    
+            if(response.redirected) {
+                window.location.href = response.url;
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
 
+    function handleClick(){
+        persistDrugs();
+    }
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
@@ -75,7 +100,9 @@ function Search() {
 
     return (
         <div className="parent-search">
-
+            <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+                handleClick();
+            }} >Save</div>
             <div className="search-bar-container">
                 
                     <div style={{display:'flex',width:'100%'}}>
@@ -102,10 +129,12 @@ function Search() {
 
                     <Stack>
     {selectedResults.map((result, index) => 
-        
         (
         <div className={`selected-result-item ${currentSelectedItem === result ? 'selected' : ''}`} key={index}>
-            <div onClick={() => {setDrugName(result); setCurrentSelectedItem(result);}}>
+            <div onClick={() => {
+                setDrugName(result);
+                setCurrentSelectedItem(result);
+                 }}>
                 {result}
             </div>
             <Button

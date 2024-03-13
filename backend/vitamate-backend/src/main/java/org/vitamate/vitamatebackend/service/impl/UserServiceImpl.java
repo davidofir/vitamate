@@ -26,6 +26,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void save(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
     public List<Optional<UserDTO>> findAll() {
         return userRepository.findAll()
                 .stream()
@@ -46,24 +51,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addDrugToUser(String userId, String drug) {
+    public void addDrugToUser(String userId, List<String> newDrugs) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        if(!user.getDrugs().contains(drug)){
-            user.AddDrug(drug);
-            userRepository.save(user);
-        }
+        user.setDrugs(newDrugs);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<String> getAllDrugs(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getDrugs();
 
     }
 
     @Override
-    public void removeDrugFromUser(String userId, String drug) {
+    public void removeDrugFromUser(String userId, List<String> drugsToRemove) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        if(user.getDrugs().contains(drug)){
-            user.removeDrug(drug);
-            userRepository.save(user);
-        }
-    }
+        List<String> userDrugs = user.getDrugs();
 
+        // Validate and remove only drugs that exist in the user's list
+        userDrugs.removeIf(drug -> drugsToRemove.contains(drug));
+
+        userRepository.save(user);
+    }
     @Override
     public Optional<UserDTO> findByLogin(String login) {
         return convertToDto(userRepository.findByLogin(login));

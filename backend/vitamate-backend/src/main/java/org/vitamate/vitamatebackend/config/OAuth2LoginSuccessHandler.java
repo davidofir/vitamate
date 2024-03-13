@@ -46,7 +46,6 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
             Map<String,Object> attributes = principal.getAttributes();
             String login = attributes.getOrDefault("email","") == null ? attributes.getOrDefault("login","").toString() : attributes.getOrDefault("email","").toString();
-
             String name = attributes.getOrDefault("name","").toString();
             userService.findByLogin(login).ifPresentOrElse(user -> {
                 DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRole().name()))
@@ -55,13 +54,14 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
             },()->{
-
-                User user = new User(login,name,new ArrayList<>(),RegistrationSource.Github, Role.USER);
+                String id = attributes.getOrDefault("id","").toString();
+                User user = new User(id,login,name,new ArrayList<>(),RegistrationSource.Github, Role.USER);
                 user.setRole(Role.USER);
-                user.setRegistrationSource(RegistrationSource.Github);
-                userService.save(userService.convertToDto(user).orElseThrow());
                 DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRole().name()))
                         ,attributes,"id");
+                user.setRegistrationSource(RegistrationSource.Github);
+                userService.save(user);
+
                 Authentication securityAuth = new OAuth2AuthenticationToken(newUser,List.of(new SimpleGrantedAuthority(user.getRole().name()))
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
@@ -73,6 +73,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         if("google".equals(oAuth2AccessToken.getAuthorizedClientRegistrationId())){
             DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
             Map<String,Object> attributes = principal.getAttributes();
+            String id = attributes.getOrDefault("sub","").toString();
             String login = attributes.getOrDefault("email","") == null ? attributes.getOrDefault("login","").toString() : attributes.getOrDefault("email","").toString();
             String name = attributes.getOrDefault("name","").toString();
             userService.findByLogin(login).ifPresentOrElse(user -> {
@@ -82,9 +83,9 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                         ,oAuth2AccessToken.getAuthorizedClientRegistrationId());
                 SecurityContextHolder.getContext().setAuthentication(securityAuth);
             },()->{
-                User user = new User(login,name,new ArrayList<>(),RegistrationSource.Google, Role.USER);
+                User user = new User(id,login,name,new ArrayList<>(),RegistrationSource.Google, Role.USER);
                 user.setRole(Role.USER);
-                userService.save(userService.convertToDto(user).orElseThrow());
+                userService.save(user);
                 DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRole().name()))
                         ,attributes,"sub");
                 Authentication securityAuth = new OAuth2AuthenticationToken(newUser,List.of(new SimpleGrantedAuthority(user.getRole().name()))

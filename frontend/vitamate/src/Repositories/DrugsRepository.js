@@ -12,6 +12,7 @@ export const fetchDrugs = async (drugName) => {
     const data = await res.json();
     const fetchedData = data.results[0]
     return {
+        'name':drugName,
         'purpose': findFieldByKeyContaining(fetchedData, 'purpose'),
         'warnings': findFieldByKeyContaining(fetchedData, 'warnings'),
         'do not use': findFieldByKeyContaining(fetchedData, 'do_not_use'),

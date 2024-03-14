@@ -35,16 +35,32 @@ function Search() {
         try {
             const response = await fetch(`${serverUrl}/users`, {
                 method: 'GET',
-                redirect:'follow',credentials:'include'
+                redirect: 'follow',
+                credentials: 'include'
             });
+    
             if (!response.ok) {
                 throw new Error('Failed to fetch drugs');
             }
+    
             const drugs = await response.json();
-            if(response.redirected){
+    
+            if (response.redirected) {
                 document.location = response.url;
+            } else {
+
+
+                setSelectedResults(drugs);
+                const newExistingResults = {};
+
+                drugs.forEach(drugName => {
+                    if(!existingResults[drugName]){
+                        newExistingResults[drugName] = true;
+                    }
+                });
+
+                setExistingResults(newExistingResults)
             }
-            setDrugData(drugs);
         } catch (error) {
             console.error('Error fetching drugs:', error);
         }
@@ -106,11 +122,6 @@ function Search() {
         };
         checkAuthStatus();
     }, []);
-    useEffect(()=>{
-        if(loggedIn){
-
-        }
-    },[loggedIn])
     useEffect(() => {
         (async () => {
             if (drugName.length > 0) {

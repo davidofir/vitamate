@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors-> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/").permitAll();
+            auth.requestMatchers("/users/auth/status").permitAll();
             auth.anyRequest().authenticated();
         })
                 .oauth2Login(oauth2->{
@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of( "http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of( "http://localhost:3001"));
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);

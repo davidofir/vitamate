@@ -31,6 +31,22 @@ function Search() {
         });
     };
     const serverUrl = 'http://localhost:8080';
+    const handleLogoutClick = async () => {
+        try {
+            const response = await fetch(`${serverUrl}/logout`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                setLoggedIn(false);
+                window.location.reload();
+            } else {
+                console.error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
     const getDrugs = async () => {
         try {
             const response = await fetch(`${serverUrl}/users`, {
@@ -67,7 +83,7 @@ function Search() {
     };
     const persistDrugs = async () => {
         try {
-            const response = await fetch('http://localhost:8080/users/drugs', {
+            const response = await fetch(`${serverUrl}/users/drugs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,6 +131,7 @@ function Search() {
                     setLoggedIn(true);
                 } else {
                     setLoggedIn(false);
+
                 }
             } catch (error) {
                 console.error('Error checking auth status:', error);
@@ -168,9 +185,11 @@ function Search() {
             <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
                 handleSaveClick();
             }} >Save</div>
-            <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+            { !loggedIn ? (<div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
                 handleLoginClick();
-            }} >Login</div>
+            }} >Login</div>): (<div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+                handleLogoutClick();
+            }}>Logout</div>) }
             <div className="search-bar-container">
                 
                     <div style={{display:'flex',width:'100%'}}>

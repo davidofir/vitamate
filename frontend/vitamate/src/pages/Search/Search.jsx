@@ -166,7 +166,7 @@ function Search() {
         }
 
         return (
-            <Tabs defaultActiveKey="first" className="mb-3">
+            <Tabs style={{display:'flex',justifyContent:'center',marginTop:'10px'}} defaultActiveKey="first" className="mb-3">
                 {Object.entries(drugData).map(([key, value], index) => (
                     <Tab eventKey={key} title={key} key={index}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -182,18 +182,25 @@ function Search() {
 
     return (
         <div className="parent-search">
-            <div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
-                handleSaveClick();
-            }} >Save</div>
-            { !loggedIn ? (<div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+            <div style={{display:'flex',justifyContent:'space-between'}}>
+            <img style={{width:'250px'}} src='VitaMateLogo.png'/>
+            <div style={{ marginRight:'10px',marginTop:'10px'}}>
+            
+            { !loggedIn ? (<Button style={{borderRadius:'20px'}} onClick={()=>{
                 handleLoginClick();
-            }} >Login</div>): (<div style={{textAlign:'end', marginRight:'10px'}} onClick={()=>{
+            }} >Login</Button>): (<Button onClick={()=>{
                 handleLogoutClick();
-            }}>Logout</div>) }
-            <div className="search-bar-container">
+            }} style={{borderRadius:'20px'}}>Logout</Button>) }
+            
+            </div>
                 
+            </div>
+            
+            <div className="search-bar-container">
+
                     <div style={{display:'flex',width:'100%'}}>
                     <SearchBar setResults={setResults} input={input} setInput={setInput} />
+                    <div style={{display:'flex',flexDirection:'horizontal'}}>
                     <Button onClick={()=>{
                           setSelectedResults(prevSelectedResults => {
                             const newResult = input.trim().toLocaleUpperCase();
@@ -209,16 +216,20 @@ function Search() {
                         });  
                     }
                     
-                    } style={{marginLeft:'10px'}}>Search</Button>
+                    } style={{marginLeft:'10px',borderRadius:'10px'}}>Add</Button>
+                                <Button variant='outline-primary' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
+                handleSaveClick();
+            }} >Save</Button>
+            </div>
                     </div>
                     {results ? <SearchResultsList results={results} setSelectedResults={setSelectedResults} selectedResults={selectedResults} existingResults={existingResults} setExistingResults={setExistingResults} /> : <></>}
-
-
+                        
                     <Stack>
+                        
     {selectedResults.map((result, index) => 
         (
         <div className={`selected-result-item ${currentSelectedItem === result ? 'selected' : ''}`} key={index}>
-            <div onClick={() => {
+            <div style={{width:'100%',textAlign:'center'}} onClick={() => {
                 setDrugName(result);
                 setCurrentSelectedItem(result);
                  }}>
@@ -235,7 +246,9 @@ function Search() {
             >
                 X
             </Button>
+            
         </div>
+        
     )
     )}
             
@@ -243,8 +256,9 @@ function Search() {
             </div>
             <div>
                 {renderDrugDataTabs()}
-            </div>
 
+            </div>
+                
         </div>
     );
 }

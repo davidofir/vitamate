@@ -11,6 +11,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Card from 'react-bootstrap/Card';
 import * as Icon from 'react-bootstrap-icons';
+import { FaEnvelope } from 'react-icons/fa';
 
 function Search() {
     const [results, setResults] = useState([]);
@@ -47,6 +48,11 @@ function Search() {
             console.error('Error during logout:', error);
         }
     };
+    const sendEmail = () => {
+        const subject = encodeURIComponent('Health Profile Information');
+        const body = encodeURIComponent(`Medications and drugs taken by the patient: ${results}`)
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
     const getDrugs = async () => {
         try {
             const response = await fetch(`${serverUrl}/users`, {
@@ -185,7 +191,6 @@ function Search() {
             <div style={{display:'flex',justifyContent:'space-between'}}>
             <img style={{width:'250px'}} src='VitaMateLogo.png'/>
             <div style={{ marginRight:'10px',marginTop:'10px'}}>
-            
             { !loggedIn ? (<Button style={{borderRadius:'20px'}} onClick={()=>{
                 handleLoginClick();
             }} >Login</Button>): (<Button onClick={()=>{
@@ -220,6 +225,9 @@ function Search() {
                                 <Button variant='outline-primary' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
                 handleSaveClick();
             }} >Save</Button>
+            <div style={{display:'flex',alignItems:'center',marginLeft:'10px'}}>
+            <FaEnvelope onClick={()=>sendEmail()}/>
+            </div>
             </div>
                     </div>
                     {results ? <SearchResultsList results={results} setSelectedResults={setSelectedResults} selectedResults={selectedResults} existingResults={existingResults} setExistingResults={setExistingResults} /> : <></>}

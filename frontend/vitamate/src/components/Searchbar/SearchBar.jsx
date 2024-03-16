@@ -23,7 +23,8 @@ export default function SearchBar({setResults,input,setInput}){
         <div className="input-wrapper">
             <FaSearch id="search-icon" />
             <input
-                placeholder='Type to search...'
+            style={{marginLeft:'5px'}}
+                placeholder='Type a drug name...'
                 value={input}
                 onChange={e => handleChange(e.target.value)}
             />

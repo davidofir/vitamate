@@ -12,8 +12,27 @@ import Tabs from 'react-bootstrap/Tabs';
 import Card from 'react-bootstrap/Card';
 import * as Icon from 'react-bootstrap-icons';
 import { FaEnvelope } from 'react-icons/fa';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+
 
 function Search() {
+    
+    const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+    async function run(textToSummarize){
+        try{
+            const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+            const prompt = `Summarize the following text: ${textToSummarize}`;
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            return await response.text();
+        }
+        catch(e){
+            console.error(e);
+            return textToSummarize; 
+        }
+    }
+    const MAX_WORD_COUNT = 200;
     const [results, setResults] = useState([]);
     const [selectedResults, setSelectedResults] = useState([]);
     const [drugName, setDrugName] = useState('');
@@ -32,6 +51,30 @@ function Search() {
         });
     };
     const serverUrl = 'http://localhost:8080';
+
+    const fetchNodeGemini = async (text) => {
+    try {
+        const response = await fetch('https://8596-172-93-153-68.ngrok-free.app/summarize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                textToSummarizeBase64: text
+            })
+            
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.summarizedText;
+    } catch (error) {
+        console.error('Error fetching data: ', error);
+    }
+}
     const handleLogoutClick = async () => {
         try {
             const response = await fetch(`${serverUrl}/logout`, {
@@ -150,14 +193,22 @@ function Search() {
             if (drugName.length > 0) {
                 try {
                     const data = await fetchDrugs(drugName);
-                    setDrugData(data);
+                    const summaries = {};
+    
+                    for (const [key, value] of Object.entries(data)) {
+                        const plainText = stripHtml(value);
+                        summaries[key] = plainText.split(' ').length > MAX_WORD_COUNT 
+                                        ? await fetchNodeGemini(plainText)
+                                        : plainText;
+                    }
+                    console.log(summaries)
+                    setDrugData(summaries);
                 }
                 catch (e) {
                     setDrugData({
                         'Drug not found': 'Please try a different drug'
-                    })
+                    });
                 }
-
             }
         })();
     }, [drugName]);
@@ -177,7 +228,7 @@ function Search() {
                     <Tab eventKey={key} title={key} key={index}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <Card style={{ padding: '10px', width: '80%', height: '80%' }}>
-                                {stripHtml(value)}
+                                {value}
                             </Card>
                         </div>
                     </Tab>

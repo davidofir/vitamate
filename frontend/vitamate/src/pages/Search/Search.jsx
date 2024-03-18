@@ -6,33 +6,16 @@ import Stack from 'react-bootstrap/Stack';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import { fetchDrugs } from '../../Repositories/DrugsRepository';
-import Modal from 'react-bootstrap/Modal';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Card from 'react-bootstrap/Card';
-import * as Icon from 'react-bootstrap-icons';
 import { FaEnvelope } from 'react-icons/fa';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 
 
 function Search() {
-    
-    const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
-    async function run(textToSummarize){
-        try{
-            const model = genAI.getGenerativeModel({ model: "gemini-pro"});
-            const prompt = `Summarize the following text: ${textToSummarize}`;
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            return await response.text();
-        }
-        catch(e){
-            console.error(e);
-            return textToSummarize; 
-        }
-    }
-    const MAX_WORD_COUNT = 200;
+
+    const MAX_WORD_COUNT = 400;
     const [results, setResults] = useState([]);
     const [selectedResults, setSelectedResults] = useState([]);
     const [drugName, setDrugName] = useState('');
@@ -40,8 +23,11 @@ function Search() {
     const [input,setInput] = useState('');
     const [existingResults,setExistingResults] = useState({});
     const [currentSelectedItem,setCurrentSelectedItem] = useState(null);
-    const [drugNames, setDrugNames] = useState([]);
     const [loggedIn,setLoggedIn] = useState(false);
+    const [summarizedDrugData, setSummarizedDrugData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSummarizing, setIsSummarizing] = useState({});
+    
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -50,11 +36,11 @@ function Search() {
             return newResults;
         });
     };
-    const serverUrl = 'http://localhost:8080';
+    const serverUrl = process.env.REACT_APP_SERVER_URL;
 
     const fetchNodeGemini = async (text) => {
     try {
-        const response = await fetch('https://8596-172-93-153-68.ngrok-free.app/summarize', {
+        const response = await fetch(`${process.env.REACT_APP_SUMMARY_API_URL}/summarize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -160,7 +146,9 @@ function Search() {
     const handleLoginClick = () => {
         window.location.href = `${serverUrl}/auth/login`;
     };
-
+    const renderLoadingIndicator = () => {
+        return isLoading ? <div>Loading...</div> : null;
+    };
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
@@ -189,29 +177,67 @@ function Search() {
         checkAuthStatus();
     }, []);
     useEffect(() => {
-        (async () => {
-            if (drugName.length > 0) {
+        const workerUrl = new URL(`${process.env.PUBLIC_URL}/summarizationWorker.js`, window.location);
+        const summarizationWorker = new Worker(workerUrl);
+      
+        summarizationWorker.onmessage = (e) => {
+            const { key, summarizedText, error } = e.data;
+            if (error) {
+                console.error(`Error summarizing text for key ${key}:`, error);
+                return;
+            }
+            setSummarizedDrugData(prev => ({
+                ...prev,
+                [key]: summarizedText
+            }));
+            setIsSummarizing(prev => ({
+                ...prev,
+                [key]: false
+            }));
+        };
+      
+        if (drugName.length > 0) {
+            setIsLoading(true);
+            const newIsSummarizing = { ...isSummarizing };
+      
+            (async () => {
                 try {
                     const data = await fetchDrugs(drugName);
-                    const summaries = {};
-    
+                    const originalTexts = {};
+      
                     for (const [key, value] of Object.entries(data)) {
                         const plainText = stripHtml(value);
-                        summaries[key] = plainText.split(' ').length > MAX_WORD_COUNT 
-                                        ? await fetchNodeGemini(plainText)
-                                        : plainText;
+                        originalTexts[key] = plainText;
+      
+                        if (plainText.split(' ').length > MAX_WORD_COUNT) {
+                            newIsSummarizing[key] = true;
+                            setIsSummarizing(newIsSummarizing);
+      
+                            summarizationWorker.postMessage({
+                                action: 'summarize',
+                                text: plainText,
+                                key: key,
+                                apiUrl: process.env.REACT_APP_SUMMARY_API_URL
+                            });
+                        } else {
+                            setSummarizedDrugData(prev => ({
+                                ...prev,
+                                [key]: plainText
+                            }));
+                        }
                     }
-                    console.log(summaries)
-                    setDrugData(summaries);
+                    setDrugData(originalTexts);
+                } catch (e) {
+                    console.error(e);
+                    setDrugData({ 'Drug not found': 'Please try a different drug' });
+                } finally {
+                    setIsLoading(false);
                 }
-                catch (e) {
-                    setDrugData({
-                        'Drug not found': 'Please try a different drug'
-                    });
-                }
-            }
-        })();
-    }, [drugName]);
+            })();
+        }
+      
+        return () => summarizationWorker.terminate();
+      }, [drugName]);
     useEffect(() => {
         if (loggedIn) {
             getDrugs();
@@ -221,14 +247,20 @@ function Search() {
         if (!drugData) {
             return <div></div>;
         }
-
+    
         return (
             <Tabs style={{display:'flex',justifyContent:'center',marginTop:'10px'}} defaultActiveKey="first" className="mb-3">
-                {Object.entries(drugData).map(([key, value], index) => (
+                {Object.entries(drugData).map(([key, originalValue], index) => (
                     <Tab eventKey={key} title={key} key={index}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <Card style={{ padding: '10px', width: '80%', height: '80%' }}>
-                                {value}
+                                {isSummarizing[key] ? 
+                                    <div>
+                                        <div>Loading summary...</div>
+                                        {originalValue}
+                                    </div> : 
+                                    (summarizedDrugData[key] || originalValue)
+                                }
                             </Card>
                         </div>
                     </Tab>
@@ -236,7 +268,6 @@ function Search() {
             </Tabs>
         );
     };
-
     return (
         <div className="parent-search">
             <div style={{display:'flex',justifyContent:'space-between'}}>

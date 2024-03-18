@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
+require('dotenv').config({path:'/backend/node-api-layer/.env'});
 const app = express();
 const cors = require('cors');
 

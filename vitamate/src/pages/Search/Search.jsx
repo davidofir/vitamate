@@ -79,7 +79,7 @@ function Search() {
     };
     const sendEmail = () => {
         const subject = encodeURIComponent('Health Profile Information');
-        const body = encodeURIComponent(`Medications and drugs taken by the patient: ${results}`)
+        const body = encodeURIComponent(`Medications and drugs taken by the patient: ${selectedResults}`)
         window.location.href = `mailto:?subject=${subject}&body=${body}`;
     }
     const getDrugs = async () => {

@@ -1,35 +1,47 @@
-import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+import React, { useState } from 'react';
+import Modal from '@mui/joy/Modal';
+import ModalClose from '@mui/joy/ModalClose';
+import ModalDialog from '@mui/joy/ModalDialog';
+import Sheet from '@mui/joy/Sheet';
+import Button from '@mui/joy/Button';
+import Typography from '@mui/joy/Typography';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-function SignInModal({handleGoogleLogin}) {
+function SignInModal({ handleGoogleLogin }) {
     const [show, setShow] = useState(false);
-  
+
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-  
+
+
     return (
       <>
-        <Button variant="primary" style={{borderRadius:'20px'}} onClick={handleShow}>
+        <Button variant="solid" onClick={handleShow} sx={{ borderRadius: '20px' }}>
           Login
         </Button>
-  
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Select Login Option</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div style={{display:'flex',justifyContent:'center'}}>
-            <Button onClick={()=>handleGoogleLogin()} style={{borderRadius:'20px'}} variant="light">
-                <FontAwesomeIcon icon={faGoogle} /> Continue with Google
-            </Button>
-            </div>
-          </Modal.Body>
+
+        <Modal open={show} onClose={handleClose}>
+          <ModalDialog>
+            <Sheet variant="outlined" sx={{ width: 'auto', borderRadius: 'md' }}>
+              <Typography level="h4" component="h3" sx={{ m: 2 }}>
+                Select Login Option
+              </Typography>
+              <ModalClose />
+            </Sheet>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
+                <Button 
+                  onClick={handleGoogleLogin} 
+                  sx={{ borderRadius: '20px', display: 'flex', alignItems: 'center', gap: 1 }} 
+                  variant="outlined"
+                >
+                  <FontAwesomeIcon icon={faGoogle} /> Continue with Google
+                </Button>
+              </div>
+          </ModalDialog>
         </Modal>
       </>
     );
-  }
-  
-  export default SignInModal;
+}
+
+export default SignInModal;

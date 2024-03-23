@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import SearchBar from '../../components/Searchbar/SearchBar';
 import './Search.css'
 import SearchResultsList from '../../components/SearchResultsList/SearchResultsList';
-import Stack from 'react-bootstrap/Stack';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Button from 'react-bootstrap/Button';
+import Button from '@mui/joy/Button';
 import { fetchDrugs } from '../../Repositories/DrugsRepository';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Card from 'react-bootstrap/Card';
 import { FaEnvelope } from 'react-icons/fa';
 import SignInModal from '../../components/SignInModal/SignInModal';
+import IconButton from '@mui/joy/IconButton';
+import Container from '@mui/joy/Container'; // or import { Container } from '@mui/joy';
+import Card from '@mui/joy/Card'; // or import { Card } from '@mui/joy';
+import Typography from '@mui/joy/Typography'; // or import { Typography } from '@mui/joy';
+import Stack from 'react-bootstrap/Stack';
+import Tabs from '@mui/joy/Tabs';
+import TabList from '@mui/joy/TabList';
+import Tab from '@mui/joy/Tab';
+import TabPanel from '@mui/joy/TabPanel'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Search() {
 
@@ -26,7 +31,10 @@ function Search() {
     const [summarizedDrugData, setSummarizedDrugData] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isSummarizing, setIsSummarizing] = useState({});
-    
+    const [value, setValue] = useState(0);
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+      };
     const removeResult = (resultToRemove) => {
         setSelectedResults(prevSelectedResults => prevSelectedResults.filter(item => item !== resultToRemove));
         setExistingResults(prev => {
@@ -247,25 +255,45 @@ function Search() {
         if (!drugData) {
             return <div></div>;
         }
-    
+        const tabsArray = Object.entries(drugData);
         return (
-            <Tabs style={{display:'flex',justifyContent:'center',marginTop:'10px'}} defaultActiveKey="first" className="mb-3">
-                {Object.entries(drugData).map(([key, originalValue], index) => (
-                    <Tab eventKey={key} title={key} key={index}>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Card style={{ padding: '10px', width: '80%', height: '80%' }}>
-                                {isSummarizing[key] ? 
-                                    <div>
-                                        <div>Loading summary...</div>
-                                        {originalValue}
-                                    </div> : 
-                                    (summarizedDrugData[key] || originalValue)
-                                }
-                            </Card>
-                        </div>
-                    </Tab>
-                ))}
-            </Tabs>
+            
+                <Tabs style={{backgroundColor: 'transparent',marginTop:'0.5rem'}} aria-label="drug data tabs" defaultValue={0}>
+                    <div style={{display:'flex',justifyContent:'center'}}>
+                    <TabList sx={{ display: 'flex', 
+  flexWrap: 'wrap',
+  '& .MuiTab-root': { 
+    minWidth: 100, 
+  } }}>
+                        {tabsArray.map(([key], index) => (
+                            <Tab key={index}>{key}</Tab>
+                        ))}
+                    </TabList>
+                    </div>
+                    {tabsArray.map(([key, originalValue], index) => (
+                        <TabPanel style={{backgroundColor: 'transparent'}} value={index} key={index}>
+                            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                <Card sx={{ padding: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: 2 }}>
+                                    <Typography level="body2">
+                                        {isSummarizing[key] ? 
+                                        <div>
+                                            <div>Loading summary...</div>
+                                            {originalValue} 
+                                        </div>
+                                            : 
+                                            (summarizedDrugData[key])
+                                        }
+                                    </Typography>
+                                </Card>
+                                
+                            </Container>
+                            
+                        </TabPanel>
+                        
+                    ))}
+
+                </Tabs>
+
         );
     };
     return (
@@ -303,7 +331,7 @@ function Search() {
                     }
                     
                     } style={{marginLeft:'10px',borderRadius:'10px'}}>Add</Button>
-                                <Button variant='outline-primary' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
+                                <Button variant='outlined' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
                 handleSaveClick();
             }} >Save</Button>
             <div style={{display:'flex',alignItems:'center',marginLeft:'10px'}}>
@@ -324,17 +352,19 @@ function Search() {
                  }}>
                 {result}
             </div>
-            <Button
+            <IconButton
                 className="remove-button"
-                style={{ borderRadius:'20px' }}
+                style={{ borderRadius:'30px' }}
                 onClick={(e) => {
                     e.stopPropagation();
                     removeResult(result);
                 }}
                 aria-label={`Remove ${result}`}
+                variant='solid'
+                color='primary'
             >
                 X
-            </Button>
+            </IconButton>
             
         </div>
         

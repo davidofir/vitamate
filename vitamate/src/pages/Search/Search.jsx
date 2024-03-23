@@ -32,6 +32,7 @@ function Search() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSummarizing, setIsSummarizing] = useState({});
     const [value, setValue] = useState(0);
+    const [show, setShow] = useState(false);
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -146,7 +147,7 @@ function Search() {
         if (loggedIn) {
             persistDrugs();
         } else {
-            window.location.href = `${serverUrl}/auth/google`;
+            setShow(true)
         }
     };
 
@@ -302,7 +303,7 @@ function Search() {
             <img style={{width:'250px'}} src='VitaMateLogo.png' alt="Vitamate Logo"/>
             <div style={{ marginRight:'10px',marginTop:'10px'}}>
                 
-            { !loggedIn ? (<SignInModal handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
+            { !loggedIn ? (<SignInModal show={show} setShow={setShow} handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
                 handleLogoutClick();
             }} style={{borderRadius:'20px'}}>Logout</Button>) }
             

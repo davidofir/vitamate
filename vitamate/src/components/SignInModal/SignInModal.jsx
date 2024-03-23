@@ -8,8 +8,8 @@ import Typography from '@mui/joy/Typography';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-function SignInModal({ handleGoogleLogin }) {
-    const [show, setShow] = useState(false);
+function SignInModal({ handleGoogleLogin,show,setShow }) {
+    
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -25,10 +25,13 @@ function SignInModal({ handleGoogleLogin }) {
           <ModalDialog>
             <Sheet variant="outlined" sx={{ width: 'auto', borderRadius: 'md' }}>
               <Typography level="h4" component="h3" sx={{ m: 2 }}>
-                Select Login Option
+                Select a Login Option
               </Typography>
               <ModalClose />
             </Sheet>
+            <Typography>
+        Login to save the pinned drugs
+      </Typography>
             <div style={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
                 <Button 
                   onClick={handleGoogleLogin} 

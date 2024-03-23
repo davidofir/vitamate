@@ -10,8 +10,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Card from 'react-bootstrap/Card';
 import { FaEnvelope } from 'react-icons/fa';
-
-
+import SignInModal from '../../components/SignInModal/SignInModal';
 
 function Search() {
 
@@ -143,7 +142,7 @@ function Search() {
         }
     };
 
-    const handleLoginClick = () => {
+    const handleGoogleClick = () => {
         window.location.href = `${serverUrl}/auth/google`;
     };
     const renderLoadingIndicator = () => {
@@ -274,9 +273,8 @@ function Search() {
             <div style={{display:'flex',justifyContent:'space-between'}}>
             <img style={{width:'250px'}} src='VitaMateLogo.png' alt="Vitamate Logo"/>
             <div style={{ marginRight:'10px',marginTop:'10px'}}>
-            { !loggedIn ? (<Button style={{borderRadius:'20px'}} onClick={()=>{
-                handleLoginClick();
-            }} >Login</Button>): (<Button onClick={()=>{
+                
+            { !loggedIn ? (<SignInModal handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
                 handleLogoutClick();
             }} style={{borderRadius:'20px'}}>Logout</Button>) }
             

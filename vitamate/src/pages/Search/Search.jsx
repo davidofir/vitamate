@@ -16,6 +16,7 @@ import TabList from '@mui/joy/TabList';
 import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import MyDrugs from '../../components/MyDrugsModal/MyDrugs';
 
 function Search() {
 
@@ -335,6 +336,7 @@ function Search() {
                                 <Button variant='outlined' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
                 handleSaveClick();
             }} >Save</Button>
+             <MyDrugs selectedResults={selectedResults} setSelectedResults={setSelectedResults} existingResults={existingResults} setExistingResults={setExistingResults}/> 
             <div style={{display:'flex',alignItems:'center',marginLeft:'10px'}}>
             <FaEnvelope onClick={()=>sendEmail()}/>
             </div>

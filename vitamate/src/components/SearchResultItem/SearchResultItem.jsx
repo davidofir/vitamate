@@ -1,7 +1,9 @@
 import "./SearchResultItem.css"
+import { FaSave } from "react-icons/fa";
 export default function SearchResultItem({key,result,setSelectedResults,selectedResults,existingResults,setExistingResults}){
     return(
-        <div className="search-item-container" onClick={e=>{
+        <div className="search-item-container" style={{display:'flex',justifyContent:'space-between'}}>
+            <div  onClick={e=>{
             e.stopPropagation();
             const newResult = result.trim().toUpperCase();
             if (newResult && !existingResults[newResult]) {
@@ -10,6 +12,10 @@ export default function SearchResultItem({key,result,setSelectedResults,selected
             }}
             } key={key}>
             {result}
+            </div>
+            <div style={{display:'flex',alignItems:'center'}}>
+            <FaSave/>
+            </div>
         </div>
     );
 }

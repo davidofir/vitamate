@@ -55,22 +55,21 @@
 
   .tab-list {
     display: flex;
-    overflow-x: auto; /* Make tab list scrollable */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS devices */
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
   }
   
   .tab {
-    flex: 0 0 auto; /* Prevent tabs from shrinking */
+    flex: 0 0 auto; 
   }
   
-  /* Media query for small screens */
   @media (max-width: 768px) {
     .tab-list {
-      justify-content: space-around; /* Adjust layout for smaller screens */
+      justify-content: space-around; 
     }
   
     .tab {
-      padding: 8px 10px; /* Reduce padding on smaller screens */
-      font-size: 14px; /* Adjust font size */
+      padding: 8px 10px; 
+      font-size: 14px; 
     }
   }

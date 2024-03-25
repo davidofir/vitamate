@@ -22,3 +22,35 @@ export const fetchDrugs = async (drugName) => {
         'questions': findFieldByKeyContaining(fetchedData, 'questions')
     }
 };
+export const fetchExistingDrugs = async (drugName) =>{
+    const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/drugs/${drugName}`);
+    if(res.ok){
+        return await res.json();
+        
+    }else{
+        return null;
+    }
+}
+export const persistDrugData = async (name, purpose, warnings, doNotUse, usage, dosage, askDoctor, questions) => {
+    try {
+        const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/drug`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name, purpose, warnings, doNotUse, usage, dosage, askDoctor, questions
+            })
+        });
+
+        if (res.ok) {
+            console.log('Drug created successfully.');
+        } else {
+            console.error('Failed to create drug.');
+            const errorResponse = await res.json();
+            console.error(errorResponse);
+        }
+    } catch (error) {
+        console.error('Error persisting drug:', error);
+    }
+};

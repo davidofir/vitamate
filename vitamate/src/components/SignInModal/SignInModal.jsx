@@ -8,11 +8,11 @@ import Typography from '@mui/joy/Typography';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-function SignInModal({ handleGoogleLogin,show,setShow }) {
+function SignInModal({ handleGoogleLogin,showSignIn,setShowSignIn }) {
     
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleClose = () => setShowSignIn(false);
+    const handleShow = () => setShowSignIn(true);
 
 
     return (
@@ -21,7 +21,7 @@ function SignInModal({ handleGoogleLogin,show,setShow }) {
           Login
         </Button>
 
-        <Modal open={show} onClose={handleClose}>
+        <Modal open={showSignIn} onClose={handleClose}>
           <ModalDialog>
             <Sheet variant="outlined" sx={{ width: 'auto', borderRadius: 'md' }}>
               <Typography level="h4" component="h3" sx={{ m: 2 }}>

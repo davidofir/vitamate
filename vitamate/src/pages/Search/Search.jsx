@@ -16,6 +16,7 @@ import TabList from '@mui/joy/TabList';
 import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import SaveModal from '../../components/SaveModal/SaveModal';
 
 function Search() {
 
@@ -32,7 +33,8 @@ function Search() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSummarizing, setIsSummarizing] = useState({});
     const [value, setValue] = useState(0);
-    const [show, setShow] = useState(false);
+    const [showSignIn, setShowSignIn] = useState(false);
+    const [showSave,setShowSave] = useState(false);
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -46,29 +48,6 @@ function Search() {
     };
     const serverUrl = process.env.REACT_APP_SERVER_URL;
 
-    const fetchNodeGemini = async (text) => {
-    try {
-        const response = await fetch(`${process.env.REACT_APP_SUMMARY_API_URL}/summarize`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                textToSummarizeBase64: text
-            })
-            
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.summarizedText;
-    } catch (error) {
-        console.error('Error fetching data: ', error);
-    }
-}
     const handleLogoutClick = async () => {
         try {
             const response = await fetch(`${serverUrl}/logout`, {
@@ -147,7 +126,7 @@ function Search() {
         if (loggedIn) {
             persistDrugs();
         } else {
-            setShow(true)
+            setShowSignIn(true)
         }
     };
 
@@ -303,7 +282,7 @@ function Search() {
             <img style={{width:'250px'}} src='VitaMateLogo.png' alt="Vitamate Logo"/>
             <div style={{ marginRight:'10px',marginTop:'10px'}}>
                 
-            { !loggedIn ? (<SignInModal show={show} setShow={setShow} handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
+            { !loggedIn ? (<SignInModal showSignIn={showSignIn} setShowSignIn={setShowSignIn} handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
                 handleLogoutClick();
             }} style={{borderRadius:'20px'}}>Logout</Button>) }
             
@@ -332,9 +311,7 @@ function Search() {
                     }
                     
                     } style={{marginLeft:'10px',borderRadius:'10px'}}>Add</Button>
-                                <Button variant='outlined' style={{marginLeft:'10px',borderRadius:'10px'}} onClick={()=>{
-                handleSaveClick();
-            }} >Save</Button>
+                    <SaveModal showSave={showSave} setShowSave={setShowSave} handleSaveClick={handleSaveClick} selectedResults={selectedResults} showSignIn={showSignIn} loggedIn={loggedIn}/>
             <div style={{display:'flex',alignItems:'center',marginLeft:'10px'}}>
             <FaEnvelope onClick={()=>sendEmail()}/>
             </div>

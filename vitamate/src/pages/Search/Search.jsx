@@ -311,7 +311,7 @@ function Search() {
                     }
                     
                     } style={{marginLeft:'10px',borderRadius:'10px'}}>Add</Button>
-                    <SaveModal showSave={showSave} setShowSave={setShowSave} handleSaveClick={handleSaveClick} selectedResults={selectedResults} showSignIn={showSignIn} loggedIn={loggedIn}/>
+                    <SaveModal showSave={showSave} setShowSave={setShowSave} handleSaveClick={handleSaveClick} loggedIn={loggedIn} selectedResults={selectedResults} showSignIn={showSignIn} loggedIn={loggedIn}/>
             <div style={{display:'flex',alignItems:'center',marginLeft:'10px'}}>
             <FaEnvelope onClick={()=>sendEmail()}/>
             </div>

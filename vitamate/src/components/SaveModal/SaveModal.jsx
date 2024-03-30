@@ -34,7 +34,7 @@ function SaveModal({ showSave, setShowSave, handleSaveClick, selectedResults, lo
                 handleSaveClick()
                 handleClose()
             }
-        }>Save</Button></div> : <></>}
+        }>{loggedIn ? 'Save' : 'Login'}</Button></div> : <></>}
             
           </ModalDialog>
           

@@ -35,6 +35,7 @@ function Search() {
     const [value, setValue] = useState(0);
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSave,setShowSave] = useState(false);
+    const [isPersisted,setIsPersisted] = useState(false);
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -133,9 +134,6 @@ function Search() {
     const handleGoogleClick = () => {
         window.location.href = `${serverUrl}/auth/google`;
     };
-    const renderLoadingIndicator = () => {
-        return isLoading ? <div>Loading...</div> : null;
-    };
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
@@ -151,7 +149,6 @@ function Search() {
                 const response = await fetch(`${serverUrl}/users/auth/status`, {
                     credentials: 'include',
                 });
-                console.log(response)
                 if (response.status === 200) {
                     setLoggedIn(true);
                 } else {
@@ -212,6 +209,7 @@ function Search() {
                                 ...prev,
                                 [key]: plainText
                             }));
+                            
                         }
                     }
                     setDrugData(originalTexts);
@@ -223,7 +221,6 @@ function Search() {
                 }
             })();
         }
-      
         return () => summarizationWorker.terminate();
       }, [drugName]);
     useEffect(() => {
@@ -231,11 +228,28 @@ function Search() {
             getDrugs();
         }
     }, [loggedIn]);
-    const renderDrugDataTabs = () => {
+    useEffect(()=>{
+        const allSummarized = Object.keys(isSummarizing).every(key=> !isSummarizing[key])
+        if(allSummarized && summarizedDrugData.name){
+            const dataToPersist = {
+                'name':summarizedDrugData['name'],
+                'purpose': summarizedDrugData['purpose'],
+                'warnings': summarizedDrugData['warnings'],
+                'doNotUse':summarizedDrugData['do not use'],
+                'usage':summarizedDrugData['usage'],
+                'dosage':summarizedDrugData['dosage'],
+                'askDoctor':summarizedDrugData['ask doctor'],
+                'questions':summarizedDrugData['questions']
+            }
+            console.log(dataToPersist);
+        }
+    },[isSummarizing,summarizedDrugData])
+    const RenderDrugDataTabs = () => {
         if (!drugData) {
             return <div></div>;
         }
         const tabsArray = Object.entries(drugData);
+
         return (
             
                 <Tabs style={{backgroundColor: 'transparent',marginTop:'0.5rem'}} aria-label="drug data tabs" defaultValue={0}>
@@ -267,14 +281,12 @@ function Search() {
                                 </Card>
                                 
                             </Container>
-                            
                         </TabPanel>
                         
                     ))}
-
                 </Tabs>
-
         );
+
     };
     return (
         <div className="parent-search">
@@ -296,7 +308,7 @@ function Search() {
                     <SearchBar setResults={setResults} input={input} setInput={setInput} />
                     <div style={{display:'flex',flexDirection:'horizontal'}}>
                     <Button onClick={()=>{
-                          setSelectedResults(prevSelectedResults => {
+                        setSelectedResults(prevSelectedResults => {
                             const newResult = input.trim().toLocaleUpperCase();
                             
                             if (newResult && !existingResults[newResult]) {
@@ -327,7 +339,7 @@ function Search() {
             <div style={{width:'100%',textAlign:'center'}} onClick={() => {
                 setDrugName(result);
                 setCurrentSelectedItem(result);
-                 }}>
+                }}>
                 {result}
             </div>
             <IconButton
@@ -352,8 +364,7 @@ function Search() {
 </Stack>
             </div>
             <div>
-                {renderDrugDataTabs()}
-
+                {RenderDrugDataTabs()}
             </div>
                 
         </div>

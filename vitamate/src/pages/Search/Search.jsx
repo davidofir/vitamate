@@ -162,92 +162,99 @@ function Search() {
         checkAuthStatus();
     }, []);
     useEffect(() => {
-        const workerUrl = new URL(`${process.env.PUBLIC_URL}/summarizationWorker.js`, window.location);
-        const summarizationWorker = new Worker(workerUrl);
-      
-        summarizationWorker.onmessage = (e) => {
-            const { key, summarizedText, error } = e.data;
-            if (error) {
-                console.error(`Error summarizing text for key ${key}:`, error);
-                return;
-            }
-            setSummarizedDrugData(prev => ({
-                ...prev,
-                [key]: summarizedText
-            }));
-            setIsSummarizing(prev => ({
-                ...prev,
-                [key]: false
-            }));
-        };
-      
-        if (drugName.length > 0) {
-            setIsLoading(true);
-            const newIsSummarizing = { ...isSummarizing };
-      
-            (async () => {
-                try {
-                    const data = await fetchDrugs(drugName);
-                    const originalTexts = {};
-      
-                    for (const [key, value] of Object.entries(data)) {
-                        const plainText = stripHtml(value);
-                        originalTexts[key] = plainText;
-      
-                        if (plainText.split(' ').length > MAX_WORD_COUNT) {
-                            newIsSummarizing[key] = true;
-                            setIsSummarizing(newIsSummarizing);
-      
-                            summarizationWorker.postMessage({
-                                action: 'summarize',
-                                text: plainText,
-                                key: key,
-                                apiUrl: process.env.REACT_APP_SUMMARY_API_URL
-                            });
-                        } else {
-                            setSummarizedDrugData(prev => ({
-                                ...prev,
-                                [key]: plainText
-                            }));
-                            
-                        }
-                    }
-                    setDrugData(originalTexts);
-                } catch (e) {
-                    console.error(e);
-                    setDrugData({ 'Drug not found': 'Please try a different drug' });
-                } finally {
-                    setIsLoading(false);
-                }
+        if(!drugName) return;
+    
+        const foundDrug = JSON.parse(sessionStorage.getItem(drugName));
 
-            })();
+            if (drugName.length > 0) {
+                setIsLoading(true);
+                const newIsSummarizing = { ...isSummarizing };
+    
+                (async () => {
+                    try {
+                        const data = await fetchDrugs(drugName);
+                        const originalTexts = {};
+    
+                        for (const [key, value] of Object.entries(data)) {
+                            const plainText = stripHtml(value);
+                            originalTexts[key] = plainText;
+    
+                            if (plainText.split(' ').length > MAX_WORD_COUNT) {
+                                // Initialize the worker here, just before it's needed
+                                const workerUrl = new URL(`${process.env.PUBLIC_URL}/summarizationWorker.js`, window.location);
+                                const summarizationWorker = new Worker(workerUrl);
+    
+                                summarizationWorker.onmessage = (e) => {
+                                    const { key, summarizedText, error } = e.data;
+                                    if (error) {
+                                        console.error(`Error summarizing text for key ${key}:`, error);
+                                        return;
+                                    }
+                                    setSummarizedDrugData(prev => ({
+                                        ...prev,
+                                        [key]: summarizedText
+                                    }));
+                                    setIsSummarizing(prev => ({
+                                        ...prev,
+                                        [key]: false
+                                    }));
+                                };
+    
+                                newIsSummarizing[key] = true;
+                                setIsSummarizing(newIsSummarizing);
+    
+                                summarizationWorker.postMessage({
+                                    action: 'summarize',
+                                    text: plainText,
+                                    key: key,
+                                    apiUrl: process.env.REACT_APP_SUMMARY_API_URL
+                                });
+    
+                                // Cleanup function to terminate the worker
+                                return () => summarizationWorker.terminate();
+                            } else {
+                                setSummarizedDrugData(prev => ({
+                                    ...prev,
+                                    [key]: plainText
+                                }));
+                            }
+                        }
+                        setDrugData(originalTexts);
+    
+                    } catch (e) {
+                        console.error(e);
+                        setDrugData({ 'Drug not found': 'Please try a different drug' });
+                    } finally {
+                        setIsLoading(false);
+                    }
+                })();
         }
-        return () => summarizationWorker.terminate();
-      }, [drugName]);
+    }, [drugName]);
     useEffect(() => {
         if (loggedIn) {
             getDrugs();
         }
     }, [loggedIn]);
     // to persist the summarized data
-    // useEffect(()=>{
-    //     const allSummarized = Object.keys(isSummarizing).every(key=> !isSummarizing[key])
-    //     if(allSummarized && summarizedDrugData.name && !summarizedDrugData['Drug not found']){
-    //         (async()=>{
-    //             const dataToPersist = {
-    //                 'name':summarizedDrugData['name'],
-    //                 'purpose': summarizedDrugData['purpose'],
-    //                 'warnings': summarizedDrugData['warnings'],
-    //                 'doNotUse':summarizedDrugData['do not use'],
-    //                 'usage':summarizedDrugData['usage'],
-    //                 'dosage':summarizedDrugData['dosage'],
-    //                 'askDoctor':summarizedDrugData['ask doctor'],
-    //                 'questions':summarizedDrugData['questions']
-    //             }
-    //             await persistDrugData(dataToPersist);                
-    //         })();
-    //     }
-    // },[isSummarizing,summarizedDrugData])
+    useEffect(()=>{
+        const allSummarized = Object.keys(isSummarizing).every(key=> !isSummarizing[key])
+        if(allSummarized && summarizedDrugData.name && !summarizedDrugData['Drug not found']){
+            (async()=>{
+                const dataToPersist = {
+                    'name':summarizedDrugData['name'],
+                    'purpose': summarizedDrugData['purpose'],
+                    'warnings': summarizedDrugData['warnings'],
+                    'do not use':summarizedDrugData['do not use'],
+                    'usage':summarizedDrugData['usage'],
+                    'dosage':summarizedDrugData['dosage'],
+                    'ask doctor':summarizedDrugData['ask doctor'],
+                    'questions':summarizedDrugData['questions']
+                }
+                //await persistDrugData(dataToPersist);  
+                sessionStorage.setItem(summarizedDrugData['name'], JSON.stringify(dataToPersist));
+            })();
+        }
+    },[isSummarizing,summarizedDrugData])
     const RenderDrugDataTabs = () => {
         if (!drugData) {
             return <div></div>;

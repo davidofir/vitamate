@@ -5,16 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "type": "chrome",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\src\\pages\\Search\\Search.jsx",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "SWA: Run vitamate",
+            "request": "launch",
+            "type": "pwa-chrome",
+            "url": "http://localhost:4280",
+            "preLaunchTask": "swa: start vitamate",
+            "webRoot": "${workspaceFolder}/",
+            "timeout": 30000
         }
     ]
 }

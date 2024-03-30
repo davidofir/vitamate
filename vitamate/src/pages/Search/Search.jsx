@@ -3,7 +3,7 @@ import SearchBar from '../../components/Searchbar/SearchBar';
 import './Search.css'
 import SearchResultsList from '../../components/SearchResultsList/SearchResultsList';
 import Button from '@mui/joy/Button';
-import { fetchDrugs } from '../../Repositories/DrugsRepository';
+import { fetchDrugs, fetchExistingDrugs, persistDrugData } from '../../Repositories/DrugsRepository';
 import { FaEnvelope } from 'react-icons/fa';
 import SignInModal from '../../components/SignInModal/SignInModal';
 import IconButton from '@mui/joy/IconButton';
@@ -219,6 +219,7 @@ function Search() {
                 } finally {
                     setIsLoading(false);
                 }
+
             })();
         }
         return () => summarizationWorker.terminate();
@@ -228,22 +229,25 @@ function Search() {
             getDrugs();
         }
     }, [loggedIn]);
-    useEffect(()=>{
-        const allSummarized = Object.keys(isSummarizing).every(key=> !isSummarizing[key])
-        if(allSummarized && summarizedDrugData.name){
-            const dataToPersist = {
-                'name':summarizedDrugData['name'],
-                'purpose': summarizedDrugData['purpose'],
-                'warnings': summarizedDrugData['warnings'],
-                'doNotUse':summarizedDrugData['do not use'],
-                'usage':summarizedDrugData['usage'],
-                'dosage':summarizedDrugData['dosage'],
-                'askDoctor':summarizedDrugData['ask doctor'],
-                'questions':summarizedDrugData['questions']
-            }
-            console.log(dataToPersist);
-        }
-    },[isSummarizing,summarizedDrugData])
+    // to persist the summarized data
+    // useEffect(()=>{
+    //     const allSummarized = Object.keys(isSummarizing).every(key=> !isSummarizing[key])
+    //     if(allSummarized && summarizedDrugData.name && !summarizedDrugData['Drug not found']){
+    //         (async()=>{
+    //             const dataToPersist = {
+    //                 'name':summarizedDrugData['name'],
+    //                 'purpose': summarizedDrugData['purpose'],
+    //                 'warnings': summarizedDrugData['warnings'],
+    //                 'doNotUse':summarizedDrugData['do not use'],
+    //                 'usage':summarizedDrugData['usage'],
+    //                 'dosage':summarizedDrugData['dosage'],
+    //                 'askDoctor':summarizedDrugData['ask doctor'],
+    //                 'questions':summarizedDrugData['questions']
+    //             }
+    //             await persistDrugData(dataToPersist);                
+    //         })();
+    //     }
+    // },[isSummarizing,summarizedDrugData])
     const RenderDrugDataTabs = () => {
         if (!drugData) {
             return <div></div>;

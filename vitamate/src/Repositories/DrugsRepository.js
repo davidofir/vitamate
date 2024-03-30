@@ -23,7 +23,7 @@ export const fetchDrugs = async (drugName) => {
     }
 };
 export const fetchExistingDrugs = async (drugName) =>{
-    const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/drugs/${drugName}`);
+    const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/drug/${drugName}`);
     if(res.ok){
         return await res.json();
         
@@ -31,7 +31,7 @@ export const fetchExistingDrugs = async (drugName) =>{
         return null;
     }
 }
-export const persistDrugData = async (name, purpose, warnings, doNotUse, usage, dosage, askDoctor, questions) => {
+export const persistDrugData = async (data) => {
     try {
         const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/drug`, {
             method: 'POST',
@@ -39,7 +39,7 @@ export const persistDrugData = async (name, purpose, warnings, doNotUse, usage, 
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                name, purpose, warnings, doNotUse, usage, dosage, askDoctor, questions
+                data
             })
         });
 

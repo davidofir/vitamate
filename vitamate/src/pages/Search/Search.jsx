@@ -165,7 +165,10 @@ function Search() {
         if(!drugName) return;
     
         const foundDrug = JSON.parse(sessionStorage.getItem(drugName));
-
+        if(foundDrug){
+            setSummarizedDrugData(foundDrug);
+        }else
+        {
             if (drugName.length > 0) {
                 setIsLoading(true);
                 const newIsSummarizing = { ...isSummarizing };
@@ -229,6 +232,7 @@ function Search() {
                     }
                 })();
         }
+    }
     }, [drugName]);
     useEffect(() => {
         if (loggedIn) {

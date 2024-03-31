@@ -35,7 +35,6 @@ function Search() {
     const [value, setValue] = useState(0);
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSave,setShowSave] = useState(false);
-    const [isPersisted,setIsPersisted] = useState(false);
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -130,10 +129,7 @@ function Search() {
             setShowSignIn(true)
         }
     };
-
-    const handleGoogleClick = () => {
-        window.location.href = `${serverUrl}/auth/google`;
-    };
+      
     const stripHtml = (htmlString) => {
         const temporalDivElement = document.createElement("div");
         temporalDivElement.innerHTML = htmlString;
@@ -151,6 +147,7 @@ function Search() {
                 });
                 if (response.status === 200) {
                     setLoggedIn(true);
+                    
                 } else {
                     throw new Error('Not authenticated');
                 }
@@ -167,6 +164,7 @@ function Search() {
         const foundDrug = JSON.parse(sessionStorage.getItem(drugName));
         if(foundDrug){
             setSummarizedDrugData(foundDrug);
+            setDrugData(foundDrug)
         }else
         {
             if (drugName.length > 0) {
@@ -309,7 +307,7 @@ function Search() {
             <img style={{width:'250px'}} src='VitaMateLogo.png' alt="Vitamate Logo"/>
             <div style={{ marginRight:'10px',marginTop:'10px'}}>
                 
-            { !loggedIn ? (<SignInModal showSignIn={showSignIn} setShowSignIn={setShowSignIn} handleGoogleLogin={handleGoogleClick}/>): (<Button onClick={()=>{
+            { !loggedIn ? (<SignInModal showSignIn={showSignIn} setShowSignIn={setShowSignIn}/>): (<Button onClick={()=>{
                 handleLogoutClick();
             }} style={{borderRadius:'20px'}}>Logout</Button>) }
             

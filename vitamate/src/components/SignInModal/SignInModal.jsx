@@ -5,10 +5,10 @@ import ModalDialog from '@mui/joy/ModalDialog';
 import Sheet from '@mui/joy/Sheet';
 import Button from '@mui/joy/Button';
 import Typography from '@mui/joy/Typography';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle,faFacebook } from '@fortawesome/free-brands-svg-icons';
+import LoginButton from '../LoginButton/LoginButton';
 
-function SignInModal({ handleGoogleLogin,showSignIn,setShowSignIn }) {
+function SignInModal({showSignIn,setShowSignIn }) {
     
 
     const handleClose = () => setShowSignIn(false);
@@ -32,14 +32,9 @@ function SignInModal({ handleGoogleLogin,showSignIn,setShowSignIn }) {
             <Typography>
         Login to save the pinned drugs
       </Typography>
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 2 }}>
-                <Button 
-                  onClick={handleGoogleLogin} 
-                  sx={{ borderRadius: '20px', display: 'flex', alignItems: 'center', gap: 1 }} 
-                  variant="outlined"
-                >
-                  <FontAwesomeIcon icon={faGoogle} /> Continue with Google
-                </Button>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 2,flexDirection:'column' }}>
+              <LoginButton text={'Continue with Google'} icon={faGoogle} event={()=> window.location.href = `${process.env.REACT_APP_SERVER_URL}/auth/google`}/>
+              <LoginButton text={'Continue with Facebook'} icon={faFacebook} event={()=> window.location.href = `${process.env.REACT_APP_SERVER_URL}/auth/facebook`}/>
               </div>
           </ModalDialog>
         </Modal>

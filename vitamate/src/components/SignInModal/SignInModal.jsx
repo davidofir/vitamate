@@ -34,7 +34,7 @@ function SignInModal({showSignIn,setShowSignIn }) {
       </Typography>
             <div style={{ display: 'flex', justifyContent: 'center', padding: 2,flexDirection:'column' }}>
               <LoginButton text={'Continue with Google'} icon={faGoogle} event={()=> window.location.href = `${process.env.REACT_APP_SERVER_URL}/auth/google`}/>
-              <LoginButton text={'Continue with Facebook'} icon={faFacebook} event={()=> window.location.href = `${process.env.REACT_APP_SERVER_URL}/auth/facebook`}/>
+              {/* <LoginButton text={'Continue with Facebook'} icon={faFacebook} event={()=> window.location.href = `${process.env.REACT_APP_SERVER_URL}/auth/facebook`}/> */}
               </div>
           </ModalDialog>
         </Modal>

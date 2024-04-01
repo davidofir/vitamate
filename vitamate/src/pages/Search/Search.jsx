@@ -49,20 +49,9 @@ function Search() {
     const serverUrl = process.env.REACT_APP_SERVER_URL;
 
     const handleLogoutClick = async () => {
-        try {
-            const response = await fetch(`${serverUrl}/logout`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                setLoggedIn(false);
-                window.location.reload();
-            } else {
-                console.error('Logout failed');
-            }
-        } catch (error) {
-            console.error('Error during logout:', error);
-        }
+        localStorage.removeItem('token'); 
+        setLoggedIn(false);
+        window.location.reload();
     };
     const sendEmail = () => {
         const subject = encodeURIComponent('Health Profile Information');
@@ -71,10 +60,13 @@ function Search() {
     }
     const getDrugs = async () => {
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${serverUrl}/drugs`, {
                 method: 'GET',
-                redirect: 'follow',
-                credentials: 'include'
+                headers: {
+                    'Authorization': `Bearer ${token}`, 
+                    'Content-Type': 'application/json'
+                }
             });
     
             if (!response.ok) {
@@ -105,20 +97,22 @@ function Search() {
     };
     const persistDrugs = async () => {
         try {
+            const token = localStorage.getItem('token'); 
             const response = await fetch(`${serverUrl}/drugs`, {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`, 
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
-                body: JSON.stringify( Object.keys(existingResults) )
+                body: JSON.stringify(Object.keys(existingResults))
             });
     
-            if(response.redirected) {
-                window.location.href = response.url;
+            if (!response.ok) {
+                throw new Error('Failed to update drugs');
             }
+            
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error updating drugs:', error);
         }
     };
 
@@ -140,24 +134,38 @@ function Search() {
         return text;
     };
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            try {
-                const response = await fetch(`${serverUrl}/users/auth/status`, {
-                    credentials: 'include',
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        if (tokenFromUrl) {
+          localStorage.setItem('token', tokenFromUrl);
+          setLoggedIn(true);
+          window.history.pushState({}, document.title, window.location.pathname);
+        } else {
+          const storedToken = localStorage.getItem('token');
+          if (storedToken) {
+            const validateToken = async () => {
+              try {
+                const response = await fetch(`${serverUrl}/users/auth/status`, { 
+                  headers: {
+                    'Authorization': `Bearer ${storedToken}`,
+                  },
                 });
                 if (response.status === 200) {
-                    setLoggedIn(true);
-                    
+                  setLoggedIn(true);
                 } else {
-                    throw new Error('Not authenticated');
+                  localStorage.removeItem('token');
+                  setLoggedIn(false);
+                  console.error('Token validation failed:', await response.text());
                 }
-            } catch (error) {
-                console.error('Error checking auth status:', error);
+              } catch (error) {
+                console.error('Error during token validation:', error);
                 setLoggedIn(false);
-            }
-        };
-        checkAuthStatus();
-    }, []);
+              }
+            };
+            validateToken();
+          }
+        }
+      }, [window.location.search]);
     useEffect(() => {
         if(!drugName) return;
     

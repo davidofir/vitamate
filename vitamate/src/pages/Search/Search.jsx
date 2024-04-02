@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SearchBar from '../../components/Searchbar/SearchBar';
 import './Search.css'
 import SearchResultsList from '../../components/SearchResultsList/SearchResultsList';
@@ -35,6 +35,7 @@ function Search() {
     const [value, setValue] = useState(0);
     const [showSignIn, setShowSignIn] = useState(false);
     const [showSave,setShowSave] = useState(false);
+    const workerRef = useRef({});
     const handleChange = (event, newValue) => {
         setValue(newValue);
       };
@@ -166,79 +167,82 @@ function Search() {
           }
         }
       }, [window.location.search]);
-    useEffect(() => {
-        if(!drugName) return;
-    
-        const foundDrug = JSON.parse(sessionStorage.getItem(drugName));
-        if(foundDrug){
-            setSummarizedDrugData(foundDrug);
-            setDrugData(foundDrug)
-        }else
-        {
-            if (drugName.length > 0) {
-                setIsLoading(true);
-                const newIsSummarizing = { ...isSummarizing };
-    
-                (async () => {
-                    try {
-                        const data = await fetchDrugs(drugName);
-                        const originalTexts = {};
-    
-                        for (const [key, value] of Object.entries(data)) {
-                            const plainText = stripHtml(value);
-                            originalTexts[key] = plainText;
-    
-                            if (plainText.split(' ').length > MAX_WORD_COUNT) {
-                                // Initialize the worker here, just before it's needed
-                                const workerUrl = new URL(`${process.env.PUBLIC_URL}/summarizationWorker.js`, window.location);
-                                const summarizationWorker = new Worker(workerUrl);
-    
-                                summarizationWorker.onmessage = (e) => {
-                                    const { key, summarizedText, error } = e.data;
-                                    if (error) {
-                                        console.error(`Error summarizing text for key ${key}:`, error);
-                                        return;
-                                    }
-                                    setSummarizedDrugData(prev => ({
-                                        ...prev,
-                                        [key]: summarizedText
-                                    }));
-                                    setIsSummarizing(prev => ({
-                                        ...prev,
-                                        [key]: false
-                                    }));
-                                };
-    
-                                newIsSummarizing[key] = true;
-                                setIsSummarizing(newIsSummarizing);
-    
-                                summarizationWorker.postMessage({
-                                    action: 'summarize',
-                                    text: plainText,
-                                    key: key,
-                                    apiUrl: process.env.REACT_APP_SUMMARY_API_URL
-                                });
-    
-                                // Cleanup function to terminate the worker
-                                return () => summarizationWorker.terminate();
-                            } else {
-                                setSummarizedDrugData(prev => ({
-                                    ...prev,
-                                    [key]: plainText
-                                }));
-                            }
-                        }
-                        setDrugData(originalTexts);
-    
-                    } catch (e) {
-                        console.error(e);
-                        setDrugData({ 'Drug not found': 'Please try a different drug' });
-                    } finally {
-                        setIsLoading(false);
-                    }
-                })();
+      useEffect(() => {
+        workerRef.current.isComponentMounted = true;
+        return () => {
+            if (workerRef.current.worker) {
+                workerRef.current.worker.terminate();
+            }
+            workerRef.current.isComponentMounted = false;
+        };
+    }, []);
+
+    const safelySetState = (action) => {
+        if (workerRef.current.isComponentMounted) {
+            action();
         }
-    }
+    };
+
+    useEffect(() => {
+        if (!drugName) return;
+
+        const foundDrug = JSON.parse(sessionStorage.getItem(drugName));
+        if (foundDrug) {
+            safelySetState(() => {
+                setSummarizedDrugData(foundDrug);
+                setDrugData(foundDrug);
+            });
+        } else {
+            setIsLoading(true);
+            (async () => {
+                try {
+                    const data = await fetchDrugs(drugName);
+                    const originalTexts = {};
+                    for (const [key, value] of Object.entries(data)) {
+                        const plainText = stripHtml(value);
+                        originalTexts[key] = plainText;
+
+                        if (plainText.split(' ').length > MAX_WORD_COUNT) {
+                            if (workerRef.current.worker) {
+                                workerRef.current.worker.terminate(); // Terminate the existing worker
+                            }
+                            const workerUrl = new URL(`${process.env.PUBLIC_URL}/summarizationWorker.js`, window.location);
+                            workerRef.current.worker = new Worker(workerUrl);
+
+                            workerRef.current.worker.onmessage = (e) => {
+                                const { key, summarizedText, error } = e.data;
+                                if (error) {
+                                    console.error(`Error summarizing text for key ${key}:`, error);
+                                    return;
+                                }
+                                safelySetState(() => {
+                                    setSummarizedDrugData(prev => ({ ...prev, [key]: summarizedText }));
+                                    setIsSummarizing(prev => ({ ...prev, [key]: false }));
+                                });
+                            };
+
+                            setIsSummarizing(prev => ({ ...prev, [key]: true }));
+                            workerRef.current.worker.postMessage({
+                                action: 'summarize',
+                                text: plainText,
+                                key,
+                                apiUrl: process.env.REACT_APP_SUMMARY_API_URL,
+                            });
+                        } else {
+                            safelySetState(() => {
+                                setSummarizedDrugData(prev => ({ ...prev, [key]: plainText }));
+                            });
+                        }
+                    }
+                    safelySetState(() => setDrugData(originalTexts));
+                } catch (e) {
+                    console.error(e);
+                    safelySetState(() => setDrugData({ 'Drug not found': 'Please try a different drug' }));
+                } finally {
+                    safelySetState(() => setIsLoading(false));
+                }
+            })();
+        }
     }, [drugName]);
     useEffect(() => {
         if (loggedIn) {
